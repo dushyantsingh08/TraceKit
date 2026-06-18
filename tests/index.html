@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraceKit Fingerprint Dashboard</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0b0d10;
+      --card-bg: #12151a;
+      --card-border: #222730;
+      --text-main: #e2e8f0;
+      --text-muted: #828c9a;
+      --accent: #38bdf8; /* minimal solid sky-blue accent */
+      --accent-bg: rgba(56, 189, 248, 0.08);
+      --success: #34d399;
+      --success-bg: rgba(52, 211, 153, 0.08);
+      --warning: #fbbf24;
+      --warning-bg: rgba(251, 191, 36, 0.08);
+      --error: #f87171;
+      --border-radius: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 3rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: left;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1.5rem;
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+      display: inline-block;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+
+    /* Visitor ID Hero Card */
+    .hero-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .hero-label {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-align: left;
+    }
+
+    .visitor-id-display {
+      font-family: 'Fira Code', monospace;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 1.5rem;
+      word-break: break-all;
+      text-align: left;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: flex-start;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b0d10;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--text-muted);
+    }
+
+    /* Dashboard Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .section-title span.badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-stable {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .badge-dynamic {
+      background: rgba(130, 140, 154, 0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(130, 140, 154, 0.2);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-header {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .info-value {
+      color: var(--text-main);
+      font-weight: 500;
+      text-align: right;
+      max-width: 60%;
+      word-break: break-all;
+    }
+
+    /* Font Pills */
+    .pills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      color: var(--text-main);
+      font-weight: 400;
+    }
+
+    /* WebGL Canvas Preview */
+    .preview-canvas-container {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 0.75rem;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--card-border);
+    }
+
+    .preview-img {
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      background: #000;
+    }
+
+    /* Status Indicators */
+    .status-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .status-granted {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.15);
+    }
+
+    .status-prompt {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid rgba(251, 191, 36, 0.15);
+    }
+
+    .status-denied {
+      background: rgba(248, 113, 113, 0.08);
+      color: var(--error);
+      border: 1px solid rgba(248, 113, 113, 0.15);
+    }
+
+    .status-unsupported {
+      background: rgba(130, 140, 154, 0.08);
+      color: var(--text-muted);
+      border: 1px solid rgba(130, 140, 154, 0.15);
+    }
+
+    /* Raw Code Panel */
+    .raw-panel {
+      margin-top: 2.5rem;
+    }
+
+    .code-block {
+      background: #07090c;
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      padding: 1.25rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      max-height: 400px;
+      color: #94a3b8;
+    }
+
+    /* Animation */
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    /* Copy toast notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--success);
+      color: #0b0d10;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">TraceKit</div>
+      <div class="subtitle">Zero-Dependency Browser Fingerprinting Dashboard</div>
+    </header>
+
+    <!-- Visitor ID Display -->
+    <section class="hero-card">
+      <div class="hero-label">Your Unique Visitor ID</div>
+      <div class="visitor-id-display" id="visitorId">Loading...</div>
+      <div class="action-row">
+        <button class="btn btn-primary" id="btnRefresh">
+          <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Recalculate ID
+        </button>
+        <button class="btn btn-secondary" id="btnCopy">
+          Copy ID
+        </button>
+      </div>
+    </section>
+
+    <!-- Dashboard Sections -->
+    <div class="dashboard-grid">
+      
+      <!-- COLUMN 1: Stable Components -->
+      <div>
+        <h2 class="section-title">
+          Hashed Components 
+          <span class="badge badge-stable">Stable</span>
+        </h2>
+
+        <!-- Canvas -->
+        <div class="card">
+          <div class="card-header">Canvas 2D Rendering</div>
+          <div class="info-row">
+            <span class="info-label">Fingerprint Hash</span>
+            <span class="info-value" id="valCanvasHash">Generating...</span>
+          </div>
+          <div class="preview-canvas-container">
+            <span class="info-label">Visual Image Output:</span>
+            <img class="preview-img" id="imgCanvas" width="200" height="50" alt="Canvas 2D rendering output preview">
+          </div>
+        </div>
+
+        <!-- Audio -->
+        <div class="card">
+          <div class="card-header">Audio Signature</div>
+          <div class="info-row">
+            <span class="info-label">Offline Checksum</span>
+            <span class="info-value" id="valAudio">Loading...</span>
+          </div>
+        </div>
+
+        <!-- WebGL -->
+        <div class="card">
+          <div class="card-header">WebGL Graphics Pipeline</div>
+          <div class="info-row">
+            <span class="info-label">WebGL Supported</span>
+            <span class="info-value" id="valWebglSupported">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">GPU Vendor</span>
+            <span class="info-value" id="valWebglVendor">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">GPU Renderer</span>
+            <span class="info-value" id="valWebglRenderer">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Unmasked Vendor</span>
+            <span class="info-value" id="valWebglUnmaskedVendor">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Unmasked Renderer</span>
+            <span class="info-value" id="valWebglUnmaskedRenderer">Loading...</span>
+          </div>
+          <div class="preview-canvas-container">
+            <span class="info-label">Shader Image Output:</span>
+            <img class="preview-img" id="imgWebgl" width="60" height="60" alt="WebGL 3D shader rendering output preview">
+          </div>
+        </div>
+
+        <!-- System Fonts -->
+        <div class="card">
+          <div class="card-header">
+            System Fonts
+            <span class="info-label" id="fontCount">0 found</span>
+          </div>
+          <div class="pills-container" id="fontPills">
+            <!-- Dynamic font list -->
+          </div>
+        </div>
+
+        <!-- Permissions -->
+        <div class="card">
+          <div class="card-header">API Permission States</div>
+          <div id="permissionContainer">
+            <!-- Dynamic permissions -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUMN 2: Hybrid Stable & Dynamic Info -->
+      <div>
+        <h2 class="section-title">
+          Contextual Attributes
+          <span class="badge badge-dynamic">Dynamic / Informational</span>
+        </h2>
+
+        <!-- Browser Configuration -->
+        <div class="card">
+          <div class="card-header">Browser Settings</div>
+          <div class="info-row">
+            <span class="info-label">Language</span>
+            <span class="info-value" id="valLanguage">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Languages List</span>
+            <span class="info-value" id="valLanguages">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Timezone Name</span>
+            <span class="info-value" id="valTimezone">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Timezone Offset (Min)</span>
+            <span class="info-value" id="valTimezoneOffset">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Cookies Enabled</span>
+            <span class="info-value" id="valCookies">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">DNT (Do Not Track)</span>
+            <span class="info-value" id="valDNT">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">PDF Viewer Built-in</span>
+            <span class="info-value" id="valPdf">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Hardware & Devices -->
+        <div class="card">
+          <div class="card-header">Device Hardware Specs</div>
+          <div class="info-row">
+            <span class="info-label">Platform OS</span>
+            <span class="info-value" id="valPlatform">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Logical CPU Cores</span>
+            <span class="info-value" id="valCores">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Device RAM Class</span>
+            <span class="info-value" id="valMemory">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Device Pixel Ratio</span>
+            <span class="info-value" id="valPixelRatio">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">CPU Architecture (UAData)</span>
+            <span class="info-value" id="valArchitecture">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">OS Version (UAData)</span>
+            <span class="info-value" id="valOSVersion">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Media playback -->
+        <div class="card">
+          <div class="card-header">HTML5 Codecs Support</div>
+          <div class="info-row">
+            <span class="info-label">MP3 / AAC / WAV</span>
+            <span class="info-value" id="valAudioCodecs">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">VP9 / H264 / WebM</span>
+            <span class="info-value" id="valVideoCodecs">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Audio Devices Count</span>
+            <span class="info-value" id="valAudioDevCount">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Video Devices Count</span>
+            <span class="info-value" id="valVideoDevCount">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Screen Resolution -->
+        <div class="card">
+          <div class="card-header">Display Geometry</div>
+          <div class="info-row">
+            <span class="info-label">Screen Resolution</span>
+            <span class="info-value" id="valResolution">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Available Resolution</span>
+            <span class="info-value" id="valAvailResolution">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Color Depth</span>
+            <span class="info-value" id="valColorDepth">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Current Orientation</span>
+            <span class="info-value" id="valOrientation">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Storage & Connection -->
+        <div class="card">
+          <div class="card-header">Storage & Network Info</div>
+          <div class="info-row">
+            <span class="info-label">LocalStorage Support</span>
+            <span class="info-value" id="valLocalStorage">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">IndexedDB Support</span>
+            <span class="info-value" id="valIndexedDB">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Estimated Storage Quota</span>
+            <span class="info-value" id="valQuota">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Network Downlink</span>
+            <span class="info-value" id="valDownlink">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Effective Type / RTT</span>
+            <span class="info-value" id="valRTT">Loading...</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Raw JSON view -->
+    <section class="raw-panel">
+      <h2 class="section-title">Raw Hashed Components Object</h2>
+      <pre class="code-block"><code id="codeRaw">Loading fingerprint components...</code></pre>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">Visitor ID Copied!</div>
+
+  <!-- Loading script as module to test directly -->
+  <script type="module">
+    import TraceKit, { murmurHash3 } from '../src/index.js';
+
+    async function runFingerprint() {
+      const refreshIcon = document.getElementById('refreshIcon');
+      refreshIcon.classList.add('spin');
+
+      try {
+        const fp = await TraceKit.get();
+        console.log('Fingerprint computed:', fp);
+
+        // Render Visitor ID
+        document.getElementById('visitorId').textContent = fp.visitorId;
+
+        // Render Canvas values
+        const canvasData = fp.components.stable.browser.canvas;
+        document.getElementById('imgCanvas').src = canvasData;
+        document.getElementById('valCanvasHash').textContent = murmurHash3(canvasData);
+
+        // Render Audio
+        document.getElementById('valAudio').textContent = fp.components.stable.audio;
+
+        // Render WebGL values
+        const gl = fp.components.stable.webgl;
+        document.getElementById('valWebglSupported').textContent = gl.supported ? 'Yes' : 'No';
+        if (gl.supported) {
+          document.getElementById('valWebglVendor').textContent = gl.vendor;
+          document.getElementById('valWebglRenderer').textContent = gl.renderer;
+          document.getElementById('valWebglUnmaskedVendor').textContent = gl.unmaskedVendor || 'None';
+          document.getElementById('valWebglUnmaskedRenderer').textContent = gl.unmaskedRenderer || 'None';
+          document.getElementById('imgWebgl').src = gl.image;
+        } else {
+          document.getElementById('valWebglVendor').textContent = '-';
+          document.getElementById('valWebglRenderer').textContent = '-';
+          document.getElementById('valWebglUnmaskedVendor').textContent = '-';
+          document.getElementById('valWebglUnmaskedRenderer').textContent = '-';
+        }
+
+        // Render Fonts
+        const fonts = fp.components.stable.fonts;
+        document.getElementById('fontCount').textContent = `${fonts.length} found`;
+        const fontPills = document.getElementById('fontPills');
+        fontPills.innerHTML = '';
+        if (fonts.length === 0) {
+          fontPills.innerHTML = '<span class="info-label">No custom fonts detected</span>';
+        } else {
+          fonts.forEach(font => {
+            const span = document.createElement('span');
+            span.className = 'pill';
+            span.textContent = font;
+            fontPills.appendChild(span);
+          });
+        }
+
+        // Render Permissions
+        const permissions = fp.components.stable.permission;
+        const permissionContainer = document.getElementById('permissionContainer');
+        permissionContainer.innerHTML = '';
+        Object.entries(permissions).forEach(([name, state]) => {
+          const row = document.createElement('div');
+          row.className = 'info-row';
+          
+          let stateClass = 'status-unsupported';
+          if (state === 'granted') stateClass = 'status-granted';
+          else if (state === 'prompt') stateClass = 'status-prompt';
+          else if (state === 'denied') stateClass = 'status-denied';
+
+          row.innerHTML = `
+            <span class="info-label">${name}</span>
+            <span class="status-tag ${stateClass}">${state}</span>
+          `;
+          permissionContainer.appendChild(row);
+        });
+
+        // Render Browser Settings
+        const browser = fp.components.stable.browser;
+        const dynBrowser = fp.components.dynamic.browser;
+        document.getElementById('valLanguage').textContent = browser.language || 'none';
+        document.getElementById('valLanguages').textContent = browser.languages.join(', ') || 'none';
+        document.getElementById('valTimezone').textContent = browser.timezone;
+        document.getElementById('valTimezoneOffset').textContent = `${dynBrowser.timezoneOffset} min`;
+        document.getElementById('valCookies').textContent = browser.cookieEnabled ? 'Yes' : 'No';
+        document.getElementById('valDNT').textContent = browser.doNotTrack;
+        document.getElementById('valPdf').textContent = browser.pdfViewerEnabled ? 'Yes' : 'No';
+
+        // Render Hardware
+        const hardware = fp.components.stable.hardware;
+        const dynHardware = fp.components.dynamic.hardware;
+        document.getElementById('valPlatform').textContent = hardware.platform;
+        document.getElementById('valCores').textContent = hardware.hardwareConcurrency > 0 ? hardware.hardwareConcurrency : 'N/A';
+        document.getElementById('valMemory').textContent = hardware.deviceMemory > 0 ? `${hardware.deviceMemory} GB` : 'N/A';
+        document.getElementById('valPixelRatio').textContent = dynHardware.devicePixelRatio;
+        document.getElementById('valArchitecture').textContent = hardware.userAgentData?.architecture || 'N/A';
+        document.getElementById('valOSVersion').textContent = hardware.userAgentData?.platformVersion || 'N/A';
+
+        // Render Media Playback
+        const media = fp.components.stable.media;
+        const dynMedia = fp.components.dynamic.media;
+        document.getElementById('valAudioCodecs').textContent = `MP3: ${media.codecs.mp3}, AAC: ${media.codecs.aac}, WAV: ${media.codecs.wav}`;
+        document.getElementById('valVideoCodecs').textContent = `VP9: ${media.codecs.vp9}, WebM: ${media.codecs.webmH264}, H264: ${media.codecs.h264}`;
+        document.getElementById('valAudioDevCount').textContent = `In: ${dynMedia.devices.audioInput}, Out: ${dynMedia.devices.audioOutput}`;
+        document.getElementById('valVideoDevCount').textContent = `In: ${dynMedia.devices.videoInput}`;
+
+        // Render Screen Resolution
+        const screen = fp.components.stable.screen;
+        const dynScreen = fp.components.dynamic.screen;
+        document.getElementById('valResolution').textContent = `${screen.width} x ${screen.height}`;
+        document.getElementById('valAvailResolution').textContent = `${screen.availWidth} x ${screen.availHeight}`;
+        document.getElementById('valColorDepth').textContent = `${screen.colorDepth}-bit`;
+        document.getElementById('valOrientation').textContent = `${dynScreen.orientation.type} (${dynScreen.orientation.angle}°)`;
+
+        // Render Storage & Network Info
+        const storage = browser.storage;
+        const cap = fp.components.stable.capabilities;
+        const dynCap = fp.components.dynamic.capabilities;
+        document.getElementById('valLocalStorage').textContent = storage.localStorage ? 'Yes' : 'No';
+        document.getElementById('valIndexedDB').textContent = storage.indexedDB ? 'Yes' : 'No';
+        document.getElementById('valQuota').textContent = dynCap.storageQuota > 0 ? `${Math.round(dynCap.storageQuota / (1024 * 1024 * 1024) * 100) / 100} GB` : 'N/A';
+        document.getElementById('valDownlink').textContent = dynCap.connection?.downlink ? `${dynCap.connection.downlink} Mbps` : 'N/A';
+        document.getElementById('valRTT').textContent = dynCap.connection?.rtt ? `${dynCap.connection.rtt} ms (${dynCap.connection.effectiveType})` : 'N/A';
+
+        // Render Raw JSON view
+        document.getElementById('codeRaw').textContent = JSON.stringify(fp.components.stable, null, 2);
+
+      } catch (err) {
+        console.error('Error generating fingerprint:', err);
+        document.getElementById('visitorId').textContent = 'Error computing fingerprint';
+      } finally {
+        setTimeout(() => {
+          refreshIcon.classList.remove('spin');
+        }, 300);
+      }
+    }
+
+    // Refresh button
+    document.getElementById('btnRefresh').addEventListener('click', runFingerprint);
+
+    // Copy button
+    document.getElementById('btnCopy').addEventListener('click', () => {
+      const visitorIdText = document.getElementById('visitorId').textContent;
+      if (visitorIdText && visitorIdText !== 'Loading...' && visitorIdText !== 'Error') {
+        navigator.clipboard.writeText(visitorIdText).then(() => {
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          setTimeout(() => {
+            toast.classList.remove('show');
+          }, 2000);
+        });
+      }
+    });
+
+    // Run on load
+    runFingerprint();
+  </script>
+</body>
+</html>

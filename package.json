@@ -1,21 +1,42 @@
 {
-  "name": "tracekit",
+  "name": "@dushyantsingh08/tracekit",
+  "type": "module",
   "version": "1.0.0",
-  "description": "TraceKit is a JavaScript library for error tracking and reporting.",
+  "description": "Zero-dependency high-fidelity browser fingerprinting library.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dushyantsingh08/TraceKit.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {},
-  "bugs": {
-    "url": "https://github.com/dushyantsingh08/TraceKit/issues"
+  "keywords": [
+    "fingerprint",
+    "browser-fingerprint",
+    "visitor-id",
+    "canvas-fingerprint",
+    "webgl-fingerprint",
+    "audio-fingerprint",
+    "device-fingerprint"
+  ],
+  "author": "dushyantsingh08",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "browser": "dist/index.umd.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   },
-  "type": "commonjs",
-  "main": "src/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.18.0"
   }
 }
