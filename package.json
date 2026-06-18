@@ -1,5 +1,5 @@
 {
-  "name": "@dushyantsingh08/tracekit",
+  "name": "@dushyant_45/tracekit",
   "type": "module",
   "version": "1.0.0",
   "description": "Zero-dependency high-fidelity browser fingerprinting library.",
@@ -18,6 +18,9 @@
   ],
   "author": "dushyantsingh08",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "browser": "dist/index.umd.js",
