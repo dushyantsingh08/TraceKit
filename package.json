@@ -1,0 +1,21 @@
+{
+  "name": "tracekit",
+  "version": "1.0.0",
+  "description": "TraceKit is a JavaScript library for error tracking and reporting.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dushyantsingh08/TraceKit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "bugs": {
+    "url": "https://github.com/dushyantsingh08/TraceKit/issues"
+  },
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
